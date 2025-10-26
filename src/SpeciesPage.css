@@ -1,0 +1,244 @@
+.species-two-column {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  /* make the two-column block fit inside the viewport (header/padding accounted for by JS/parent) */
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+.species-image-col {
+  flex: 0 0 60%;
+  max-width: 1000px;
+  height: 60vh;
+  max-height: 800px;
+  position: relative;
+}
+
+/* On larger viewports pin the image column to the bottom-right and align its contents to the bottom */
+@media (min-width: 801px) {
+  .species-image-col {
+  position: fixed;
+  right: 20px;
+  bottom: 0;
+  width: min(72vw, 1100px);
+  height: min(78vh, 920px);
+  max-width: 1100px;
+  max-height: 86vh;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* push children to bottom */
+    align-items: stretch;
+    pointer-events: auto;
+  }
+
+  /* position the X-Ray button at the bottom inside the pinned panel */
+  .species-image-col .xray-button {
+    top: auto;
+    bottom: 18px;
+    right: 18px;
+  }
+
+  .species-image-col .image-container {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* allow lens to overflow the pinned panel; we'll animate it away when near edges */
+}
+
+.xray-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #ad6217;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-family: "BBH Sans Hegarty", sans-serif;
+  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+.xray-button:hover {
+  background-color: #c97320;
+}
+.species-text-col {
+  flex: 1 1 40%;
+  overflow: auto; /* allow text to scroll instead of growing the page */
+  max-height: 100%;
+}
+
+@media (max-width: 800px) {
+  .species-two-column {
+    flex-direction: column;
+  }
+  .species-image-col {
+    width: 100%;
+    height: 40vh;
+  }
+}
+
+/* Shared XRay/specimen image rules used on the Species page */
+.xray-images {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: crosshair;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* radius for the reveal circle; tweak to change size */
+  --xray-radius: 140px;
+}
+
+.species-background,
+.species-foreground,
+.xray-specimen-image,
+.xray-specimen-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center center;
+  transform: translate(0, 0);
+  margin: 0;
+  padding: 0;
+}
+
+.species-background {
+  z-index: 1;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+.xray-specimen-image,
+.xray-specimen-skeleton {
+  z-index: 2;
+}
+
+.species-foreground {
+  z-index: 4;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+  pointer-events: none;
+  /* ensure foreground visually covers the bottom edge — use cover and align to bottom */
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.xray-specimen-skeleton {
+  pointer-events: none;
+  transform: translate(0, 0);
+  /* start hidden (no centered reveal) */
+  clip-path: circle(0% at 50% 50%);
+  opacity: 0;
+  transition: clip-path 220ms cubic-bezier(.2,.9,.2,1), opacity 180ms ease-out, transform 0.12s ease-out;
+  will-change: transform;
+  /* visual treatment similar to a glass spotlight (subtle glow + saturation) */
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45)) saturate(120%) contrast(105%);
+  /* slightly brighter blend so the skeleton reads like a scan */
+  mix-blend-mode: screen;
+}
+
+/* Blurred copy used to create a soft falloff/rim around the sharp reveal */
+.xray-specimen-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  pointer-events: none;
+  z-index: 2; /* below sharp skeleton (which is z-index:2 as well — we'll rely on DOM order: blur first, skeleton after) */
+  filter: blur(6px) saturate(110%) contrast(100%);
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+  will-change: opacity;
+}
+
+/* When X-Ray is active apply a subtle displacement/distortion to the blurred rim */
+.xray-images.xray-active .xray-specimen-blur {
+  /* apply SVG displacement filter then blur/saturate */
+  filter: url(#xray-distort-filter) blur(6px) saturate(110%) contrast(100%);
+}
+
+/* Glass lens above the skeleton to emulate a magnifying glass / glass plate */
+.xray-lens {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3; /* between skeleton (2) and foreground (4) */
+  opacity: 0;
+  transition: left 120ms cubic-bezier(.2,.9,.2,1), top 120ms cubic-bezier(.2,.9,.2,1), opacity 160ms ease-out, width 120ms ease-out, height 120ms ease-out, transform 160ms ease-out, box-shadow 160ms ease-out;
+  /* base glass outline (no backdrop blur on center) */
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.4);
+  overflow: visible;
+}
+
+/* When the lens reaches the container edges animate it away */
+.xray-lens.edge-exit {
+  opacity: 0 !important;
+  transform: translate(-50%, -50%) scale(0.65) !important;
+}
+
+/* rim overlay: blurred ring that sits above the specimen but keeps center clear */
+.xray-lens::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  /* radial gradient that is transparent in the center and colored on the rim */
+  background: radial-gradient(circle, rgba(255,255,255,0) 48%, rgba(255,255,255,0.18) 52%, rgba(255,255,255,0.06) 56%, rgba(0,0,0,0.36) 72%, rgba(0,0,0,0) 100%);
+  filter: blur(8px);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+/* subtle inner highlight (crisp) so center looks clear and glassy */
+.xray-lens::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 68%;
+  height: 68%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(255,255,255,0.04) 20%, rgba(255,255,255,0) 60%);
+  box-shadow: inset 0 2px 10px rgba(255,255,255,0.04);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.xray-specimen-image {
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
