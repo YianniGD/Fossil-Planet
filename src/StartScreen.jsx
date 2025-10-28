@@ -18,7 +18,7 @@ const StartScreen = ({ setView }) => {
             <div style={{ display: 'flex', gap: '1rem' }}>
                 <button style={buttonStyle} onClick={() => setView('/globe')}>Globe</button>
                 <button style={buttonStyle} onClick={() => setView('/timeline')}>Timeline</button>
-                
+                <button style={buttonStyle} onClick={() => setView('/digging-game')}>Digging Game</button>
                 <button style={buttonStyle} onClick={() => setView('/about')}>About</button>
             </div>
         </div>

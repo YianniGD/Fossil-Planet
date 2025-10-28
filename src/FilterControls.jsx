@@ -10,24 +10,24 @@ const FilterControls = ({ eras, epochs, categories, onFilterChange }) => {
       />
       <select onChange={(e) => onFilterChange('era', e.target.value)}>
         <option value="">All Eras</option>
-        {eras.map((era) => (
-          <option key={era} value={era}>
+        {eras.map((era, index) => (
+          <option key={`${era}-${index}`} value={era}>
             {era}
           </option>
         ))}
       </select>
       <select onChange={(e) => onFilterChange('epoch', e.target.value)}>
         <option value="">All Epochs</option>
-        {epochs.map((epoch) => (
-          <option key={epoch} value={epoch}>
+        {epochs.map((epoch, index) => (
+          <option key={`${epoch}-${index}`} value={epoch}>
             {epoch}
           </option>
         ))}
       </select>
       <select onChange={(e) => onFilterChange('category', e.target.value)}>
         <option value="">All Categories</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
+        {categories.map((category, index) => (
+          <option key={`${category}-${index}`} value={category}>
             {category}
           </option>
         ))}

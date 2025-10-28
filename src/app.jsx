@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
+import { geoCentroid } from 'd3-geo';
 import Globe from './Globe';
 import StartScreen from './StartScreen';
 import SpeciesPage from './SpeciesPage';
@@ -10,7 +11,8 @@ import FilterControls from './FilterControls';
 import About from './About'; // Import the About component
 import DigSitePage from './DigSitePage';
 import SplashPage from './SplashPage'; // Import the SplashPage component
-import { getInitialData } from '../data.js';
+import DiggingGame from './DiggingGame'; // Import the DiggingGame component
+
 
 const App = () => {
     const [showSplash, setShowSplash] = useState(true);
@@ -37,7 +39,16 @@ const App = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const { speciesData, eras, epochs, categories } = await getInitialData();
+                const response = await fetch('/species_index_full.json');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch prehistoric data');
+                }
+                const speciesData = await response.json();
+
+                const eras = [...new Set(speciesData.flatMap(s => s.eras))];
+                const epochs = [...new Set(speciesData.map(s => s.epoch))];
+                const categories = [...new Set(speciesData.flatMap(s => (s.categories || []).map(c => c.primary)))];
+
                 setAllSpecies(speciesData);
                 setFilteredSpecies(speciesData);
                 setEras(eras);
@@ -51,7 +62,12 @@ const App = () => {
                 const allRegions = await regionsRes.json();
                 const mergedGeoData = await mergedGeoRes.json();
 
-                const locations = mergedGeoData.features.flatMap(feature => feature.properties.dig_sites || []);
+                const locations = mergedGeoData.features.flatMap(feature => 
+                    (feature.properties.dig_sites || []).map(site => ({
+                        ...site,
+                        coords: geoCentroid(feature)
+                    }))
+                );
 
                 setLocationsData(locations);
                 setRegions(allRegions.filter(region => region.Region_Name !== 'Antarctica'));
@@ -162,7 +178,7 @@ const App = () => {
                         <Route path="/species/:speciesId" element={<SpeciesPage species={selectedSpecies} allSpecies={allSpecies} showDigSitePage={showDigSitePage} locationsData={locationsData} />} />
                         <Route path="/dig-site/:digSiteName" element={<DigSitePage digSite={selectedDigSite} allSpecies={allSpecies} showSpeciesPage={showSpeciesPage} locationsData={locationsData} />} />
                         <Route path="/about" element={<About />} />
-                        
+                        <Route path="/digging-game" element={<DiggingGame />} />
                     </Routes>
                 </>
             )}

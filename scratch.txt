@@ -1,0 +1,39 @@
+
+
+  {
+    "primary": "Early Reptiles & Parareptiles",
+    "subcategories": [
+      {
+        "subcategory": "Early Lizards & Gliders",
+        "species": [
+          "Ardeosaurus",
+          "Hylonomus",
+          "Kuehneosaurus",
+          "Megalania"
+        ]
+      },
+      {
+        "subcategory": "Early Archosauromorphs",
+        "species": [
+          "Hyperodapedon",
+          "Protorosaurus",
+          "Tanystropheus"
+        ]
+      },
+      {
+        "subcategory": "Early Parareptiles",
+        "species": [
+          "Hypsognathus",
+          "Labidosaurus",
+          "Milleretta"
+        ]
+      },
+      {
+        "subcategory": "Early Aquatic Reptiles",
+        "species": [
+          "Mesosaurus"
+        ]
+      }
+    ]
+  }
+]

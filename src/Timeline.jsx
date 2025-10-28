@@ -5,7 +5,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import * as Icons from '../Icons.jsx';
+
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 
 const Timeline = ({ speciesData, showSpeciesPage }) => {
@@ -278,16 +278,15 @@ const Timeline = ({ speciesData, showSpeciesPage }) => {
         const maxMa = Math.max(...livedFromValues);
         const minMa = Math.min(...livedFromValues);
 
-        const svgLoader = new SVGLoader();
+        const textureLoader = new THREE.TextureLoader();
 
         const loadIcon = async (species, index) => {
-            if (!species.categories || species.categories.length === 0) {
+            if (!species.time_period || typeof species.time_period.lived_from_ma === 'undefined') {
+                console.warn('Skipping species due to missing time_period data:', species.id);
                 return null;
             }
-            const subcategory = species.categories[0].subcategory;
-            if (!subcategory) {
-                return null;
-            }
+
+            const iconPath = `/images/Dinosaurs/icons/${species.icon || 'slice2.png'}`;
 
             const speciesMa = species.time_period.lived_from_ma;
             const pathPercentage = 1 - mathUtilsRef.current.normalize(speciesMa, minMa, maxMa);
@@ -306,49 +305,30 @@ const Timeline = ({ speciesData, showSpeciesPage }) => {
 
             finalPosition.add(offset);
 
-            const iconString = renderToString(<Icons.SpeciesIcon subcategory={subcategory} />);
-            const iconData = `data:image/svg+xml;utf8,${encodeURIComponent(iconString)}`;
+            const material = new THREE.SpriteMaterial({ color: 0xffffff });
+            const sprite = new THREE.Sprite(material);
 
-            return new Promise((resolve) => {
-                svgLoader.load(iconData, (data) => {
-                    if (!data) {
-                        resolve(null);
-                        return;
-                    }
-                    const paths = data.paths;
-                    const group = new THREE.Group();
-
-                    for (let i = 0; i < paths.length; i++) {
-                        const path = paths[i];
-                        const material = new THREE.MeshBasicMaterial({
-                            color: path.color,
-                            side: THREE.DoubleSide,
-                            depthWrite: false
-                        });
-                        const shapes = SVGLoader.createShapes(path);
-
-                        for (let j = 0; j < shapes.length; j++) {
-                            const shape = shapes[j];
-                            const geometry = new THREE.ShapeGeometry(shape);
-                            const mesh = new THREE.Mesh(geometry, material);
-                            mesh.userData.id = species.id; // Add this
-                            group.add(mesh);
-                        }
-                    }
-
-                    group.userData.id = species.id; // Associate species ID with the group
-                    group.position.copy(finalPosition);
-                    group.scale.set(0.01, -0.01, 1);
-                    sceneRef.current.add(group);
-
-                    resolve({
-                        position: finalPosition,
-                        iconName: subcategory,
-                        id: species.id,
-                        group: group
-                    });
-                });
+            textureLoader.load(iconPath, (texture) => {
+                material.map = texture;
+                material.needsUpdate = true;
+                const aspect = texture.image.naturalWidth / texture.image.naturalHeight;
+                const scale = 2;
+                sprite.scale.set(scale * aspect, scale, 1);
             });
+
+            sprite.userData.id = species.id; // Add this
+            const group = new THREE.Group();
+            group.add(sprite);
+
+            group.userData.id = species.id; // Associate species ID with the group
+            group.position.copy(finalPosition);
+            sceneRef.current.add(group);
+
+            return {
+                position: finalPosition,
+                id: species.id,
+                group: group
+            };
         }
 
         const loadAllIcons = async () => {

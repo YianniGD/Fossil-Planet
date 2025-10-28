@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import './SpeciesPage.css';
 
 const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) => {
     const { speciesId } = useParams();
     const [localSpecies, setLocalSpecies] = useState(species);
+    const [phrases, setPhrases] = useState({});
 
     useEffect(() => {
         if (!localSpecies && allSpecies && allSpecies.length > 0) {
@@ -12,6 +13,53 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
             setLocalSpecies(foundSpecies);
         }
     }, [localSpecies, allSpecies, speciesId]);
+
+    useEffect(() => {
+        if (localSpecies) {
+            const phrasePools = {
+                livedDuring: [
+                    "lived during",
+                    "existed in",
+                    "roamed the earth in",
+                    "was present during",
+                    "is known from"
+                ],
+                aMemberOf: [
+                    "A member of",
+                    "Belonging to",
+                    "Classified as part of"
+                ],
+                itWas: [
+                    "it was",
+                    "this creature was",
+                    "the species was",
+                    "it is described as"
+                ],
+                knownFor: [
+                    "known for being about",
+                    "measuring approximately",
+                    "reaching lengths of around",
+                    "growing to about"
+                ],
+                firstFossils: [
+                    "The first fossils of this dinosaur were discovered in",
+                    "Remains of this species were first unearthed at",
+                    "This dinosaur was first identified from fossils found in",
+                    "Initial fossil evidence was located in"
+                ]
+            };
+
+            const getRandomPhrase = (pool) => pool[Math.floor(Math.random() * pool.length)];
+
+            setPhrases({
+                livedDuring: getRandomPhrase(phrasePools.livedDuring),
+                aMemberOf: getRandomPhrase(phrasePools.aMemberOf),
+                itWas: getRandomPhrase(phrasePools.itWas),
+                knownFor: getRandomPhrase(phrasePools.knownFor),
+                firstFossils: getRandomPhrase(phrasePools.firstFossils)
+            });
+        }
+    }, [localSpecies]);
 
     const [isXRayOpen, setIsXRayOpen] = useState(false);
 
@@ -215,16 +263,29 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
 
     return (
         <div style={{ padding: '28px', color: 'white', height: '100vh', boxSizing: 'border-box', overflow: 'hidden', fontSize: '18px', lineHeight: 1.4 }}>
-            <h1 style={{ textAlign: 'right' }}>{localSpecies.id}</h1>
+            <div style={{ textAlign: 'right' }}>
+                <h1>{localSpecies.id}</h1>
+                {localSpecies.phonetic_spelling && <h2 style={{ fontStyle: 'italic', marginTop: '-10px' }}>{localSpecies.phonetic_spelling}</h2>}
+            </div>
 
             <div className="species-two-column" style={{ marginTop: 12, marginBottom: 18 }}>
                 <div className="species-text-col">
                     <div>
+                        {localSpecies.literal_translation && (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <p>
+                                    <strong>"{localSpecies.literal_translation}"</strong>
+                                    <br />
+                                    <em style={{ fontSize: '0.9em' }}>{localSpecies.etymology}</em>
+                                </p>
+                            </div>
+                        )}
+
                         <p>
-                            {localSpecies.id} lived during the {localSpecies.epoch} epoch of the {localSpecies.eras.join(', ')} era.
-                            A member of the {localSpecies.categories[0].primary}s as one of the {localSpecies.categories[0].subcategory},
-                            it was {localSpecies.description}, known for being about {localSpecies.size.feet} feet ({localSpecies.size.meters} meters) long!
-                            The first fossils of this dinosaur were discovered in the {localSpecies.discovery_locations[0].dig_site} in {localSpecies.discovery_locations[0].region}.
+                            {localSpecies.id} {phrases.livedDuring} the {localSpecies.epoch} epoch of the {localSpecies.eras && localSpecies.eras.join(', ')} era. <br />
+                            {phrases.aMemberOf} the {localSpecies.categories && localSpecies.categories.length > 0 && localSpecies.categories[0].primary} as one of the {localSpecies.categories && localSpecies.categories.length > 0 && localSpecies.categories[0].subcategory}, <br />
+                            {phrases.itWas} {localSpecies.description}, {phrases.knownFor} {localSpecies.size.feet} feet ({localSpecies.size.meters} meters) long! <br />
+                            {phrases.firstFossils} the {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].dig_site} in {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].region}.
                         </p>
                         
                         {localSpecies.discovery_locations && (
@@ -235,17 +296,22 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                                         const digSite = locationsData.find(ds => ds.Location_Name === loc.dig_site);
                                         if (!digSite) {
                                             return (
-                                                <li key={index}>
+                                                <li key={`${loc.region}-${loc.dig_site}`}>
                                                     <strong>{loc.region}:</strong> {loc.dig_site}
                                                 </li>
                                             );
                                         }
+                                        const randomImageId = Math.floor(Math.random() * 6) + 1;
+                                        const pageData = {
+                                            name: digSite.Location_Name,
+                                            description: digSite.description,
+                                            imageUrl: `/images/site_${randomImageId}.webp`,
+                                            coords: digSite.coords
+                                        };
                                         return (
-                                            <li key={index}>
-                                                <Link to={`/dig-site/${digSite.Location_Name}`} onClick={() => showDigSitePage(digSite)}>
-                                                    <strong>{loc.region}:</strong> {loc.dig_site}
-                                                    <img src={digSite.imageUrl} alt={digSite.Location_Name} style={{ width: '50px', height: '50px' }} />
-                                                </Link>
+                                            <li key={`${loc.region}-${loc.dig_site}`} onClick={() => showDigSitePage(pageData)} style={{ cursor: 'pointer' }}>
+                                                <strong>{loc.region}:</strong> {loc.dig_site}
+                                                <img src={digSite.imageUrl} alt={digSite.Location_Name} style={{ width: '50px', height: '50px' }} />
                                             </li>
                                         );
                                     })}
@@ -294,25 +360,25 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                                 className="species-background"
                             />
 
-                            {localSpecies.image && (
+                            {localSpecies.image_url && localSpecies.image_url.image && (
                                 <img
-                                    src={`/images/Dinosaurs/${localSpecies.image}`}
+                                    src={`/images/Dinosaurs/${localSpecies.image_url.image}`}
                                     alt={localSpecies.name || localSpecies.id}
                                     className="xray-specimen-image"
                                 />
                             )}
 
-                            {isXRayOpen && localSpecies.xray_image && (
+                            {isXRayOpen && localSpecies.image_url && localSpecies.image_url.xray_image && (
                                 <>
                                     <img
                                         ref={blurRef}
-                                        src={`/images/Dinosaurs/${localSpecies.xray_image}`}
+                                        src={`/images/Dinosaurs/${localSpecies.image_url.xray_image}`}
                                         alt={`${localSpecies.name || localSpecies.id} Skeleton (blur)`}
                                         className="xray-specimen-blur"
                                     />
                                     <img
                                         ref={skeletonRef}
-                                        src={`/images/Dinosaurs/${localSpecies.xray_image}`}
+                                        src={`/images/Dinosaurs/${localSpecies.image_url.xray_image}`}
                                         alt={`${localSpecies.name || localSpecies.id} Skeleton`}
                                         className="xray-specimen-skeleton"
                                     />
