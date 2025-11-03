@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import './SpeciesPage.css';
+import Lottie from 'lottie-react';
+import './css/SpeciesPage.css';
+import speciesIndex from '../json/species_index_full.json';
+import fgAnimation from '../json/fg.json';
 
 const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) => {
     const { speciesId } = useParams();
@@ -13,6 +16,16 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
             setLocalSpecies(foundSpecies);
         }
     }, [localSpecies, allSpecies, speciesId]);
+
+    const speciesData = speciesIndex.find(s => s.id === speciesId);
+    const subcategory = speciesData ? speciesData.category[0] : null;
+
+    const getSubcategoryClassName = (subcategory) => {
+        if (!subcategory) return '';
+        return `species-page--${subcategory.replace(/ /g, '-').replace(/:/g, '').toLowerCase()}`;
+    };
+
+    const subcategoryClassName = getSubcategoryClassName(subcategory);
 
     useEffect(() => {
         if (localSpecies) {
@@ -262,7 +275,7 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
     }
 
     return (
-        <div style={{ padding: '28px', color: 'white', height: '100vh', boxSizing: 'border-box', overflow: 'hidden', fontSize: '18px', lineHeight: 1.4 }}>
+        <div className={`species-page ${subcategoryClassName}`} style={{ padding: '28px', height: '100vh', boxSizing: 'border-box', overflow: 'hidden', fontSize: '18px', lineHeight: 1.4 }}>
             <div style={{ textAlign: 'right' }}>
                 <h1>{localSpecies.id}</h1>
                 {localSpecies.phonetic_spelling && <h2 style={{ fontStyle: 'italic', marginTop: '-10px' }}>{localSpecies.phonetic_spelling}</h2>}
@@ -285,7 +298,7 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                             {localSpecies.id} {phrases.livedDuring} the {localSpecies.epoch} epoch of the {localSpecies.eras && localSpecies.eras.join(', ')} era. <br />
                             {phrases.aMemberOf} the {localSpecies.categories && localSpecies.categories.length > 0 && localSpecies.categories[0].primary} as one of the {localSpecies.categories && localSpecies.categories.length > 0 && localSpecies.categories[0].subcategory}, <br />
                             {phrases.itWas} {localSpecies.description}, {phrases.knownFor} {localSpecies.size.feet} feet ({localSpecies.size.meters} meters) long! <br />
-                            {phrases.firstFossils} the {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].dig_site} in {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].region}.
+                            {phrases.firstFossils} the {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].dig_site} in {localSpecies.discovery_locations && local.discovery_locations.length > 0 && localSpecies.discovery_locations[0].region}.
                         </p>
                         
                         {localSpecies.discovery_locations && (
@@ -393,6 +406,13 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                                 />
                             )}
 
+                            <div className="species-foreground-animation">
+                                <Lottie
+                                    animationData={fgAnimation}
+                                    className="lottie-foreground"
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                            </div>
                             <img
                                 src="/images/foreground.png"
                                 alt="Foreground"

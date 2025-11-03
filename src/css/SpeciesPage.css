@@ -1,0 +1,586 @@
+.species-two-column {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  /* make the two-column block fit inside the viewport (header/padding accounted for by JS/parent) */
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+.species-image-col {
+  flex: 0 0 60%;
+  max-width: 1000px;
+  height: 60vh;
+  max-height: 800px;
+  position: relative;
+}
+
+/* On larger viewports pin the image column to the bottom-right and align its contents to the bottom */
+@media (min-width: 801px) {
+  .species-image-col {
+  position: fixed;
+  right: 20px;
+  bottom: 0;
+  width: min(72vw, 1100px);
+  height: min(78vh, 920px);
+  max-width: 1100px;
+  max-height: 86vh;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* push children to bottom */
+    align-items: stretch;
+    pointer-events: auto;
+  }
+
+  /* position the X-Ray button at the bottom inside the pinned panel */
+  .species-image-col .xray-button {
+    top: auto;
+    bottom: 18px;
+    right: 18px;
+  }
+
+  .species-image-col .image-container {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* allow lens to overflow the pinned panel; we'll animate it away when near edges */
+}
+
+.xray-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #ad6217;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-family: "BBH Sans Hegarty", sans-serif;
+  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+.xray-button:hover {
+  background-color: #c97320;
+}
+.species-text-col {
+  flex: 1 1 40%;
+  overflow: auto; /* allow text to scroll instead of growing the page */
+  max-height: 100%;
+}
+
+@media (max-width: 800px) {
+  .species-two-column {
+    flex-direction: column;
+  }
+  .species-image-col {
+    width: 100%;
+    height: 40vh;
+  }
+}
+
+/* Shared XRay/specimen image rules used on the Species page */
+.xray-images {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: crosshair;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* radius for the reveal circle; tweak to change size */
+  --xray-radius: 140px;
+}
+
+.species-background,
+.species-foreground,
+.xray-specimen-image,
+.xray-specimen-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center center;
+  transform: translate(0, 0);
+  margin: 0;
+  padding: 0;
+}
+
+.species-background {
+  z-index: 1;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+.xray-specimen-image,
+.xray-specimen-skeleton {
+  z-index: 2;
+}
+
+.species-foreground {
+  z-index: 4;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+  pointer-events: none;
+  /* ensure foreground visually covers the bottom edge — use cover and align to bottom */
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.xray-specimen-skeleton {
+  pointer-events: none;
+  transform: translate(0, 0);
+  /* start hidden (no centered reveal) */
+  clip-path: circle(0% at 50% 50%);
+  opacity: 0;
+  transition: clip-path 220ms cubic-bezier(.2,.9,.2,1), opacity 180ms ease-out, transform 0.12s ease-out;
+  will-change: transform;
+  /* visual treatment similar to a glass spotlight (subtle glow + saturation) */
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45)) saturate(120%) contrast(105%);
+  /* slightly brighter blend so the skeleton reads like a scan */
+  mix-blend-mode: screen;
+}
+
+/* Blurred copy used to create a soft falloff/rim around the sharp reveal */
+.xray-specimen-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  pointer-events: none;
+  z-index: 2; /* below sharp skeleton (which is z-index:2 as well — we'll rely on DOM order: blur first, skeleton after) */
+  filter: blur(6px) saturate(110%) contrast(100%);
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+  will-change: opacity;
+}
+
+/* When X-Ray is active apply a subtle displacement/distortion to the blurred rim */
+.xray-images.xray-active .xray-specimen-blur {
+  /* apply SVG displacement filter then blur/saturate */
+  filter: url(#xray-distort-filter) blur(6px) saturate(110%) contrast(100%);
+}
+
+/* Glass lens above the skeleton to emulate a magnifying glass / glass plate */
+.xray-lens {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3; /* between skeleton (2) and foreground (4) */
+  opacity: 0;
+  transition: left 120ms cubic-bezier(.2,.9,.2,1), top 120ms cubic-bezier(.2,.9,.2,1), opacity 160ms ease-out, width 120ms ease-out, height 120ms ease-out, transform 160ms ease-out, box-shadow 160ms ease-out;
+  /* base glass outline (no backdrop blur on center) */
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.4);
+  overflow: visible;
+}
+
+/* When the lens reaches the container edges animate it away */
+.xray-lens.edge-exit {
+  opacity: 0 !important;
+  transform: translate(-50%, -50%) scale(0.65) !important;
+}
+
+/* rim overlay: blurred ring that sits above the specimen but keeps center clear */
+.xray-lens::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  /* radial gradient that is transparent in the center and colored on the rim */
+  background: radial-gradient(circle, rgba(255,255,255,0) 48%, rgba(255,255,255,0.18) 52%, rgba(255,255,255,0.06) 56%, rgba(0,0,0,0.36) 72%, rgba(0,0,0,0) 100%);
+  filter: blur(8px);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+/* subtle inner highlight (crisp) so center looks clear and glassy */
+.xray-lens::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 68%;
+  height: 68%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(255,255,255,0.04) 20%, rgba(255,255,255,0) 60%);
+  box-shadow: inset 0 2px 10px rgba(255,255,255,0.04);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lottie-foreground path {
+  fill: var(--accent-color);
+  mix-blend-mode: multiply;
+}
+
+.species-foreground-animation {
+  transform: scaleY(-1);
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+.xray-specimen-image {
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+.species-page--agile-hunters {
+  background-color: #B23A48;
+  color: #FAFAFA;
+  --accent-color: #48B2A6;
+}
+
+.species-page--armored-fishes {
+  background-color: #A66F47;
+  color: #FAFAFA;
+  --accent-color: #477AA6;
+}
+
+.species-page--armored-plant-eaters {
+  background-color: #A2C59D;
+  color: #1A1A1A;
+  --accent-color: #C5A2C8;
+}
+
+.species-page--big-brow-horns {
+  background-color: #D0C1A1;
+  color: #1A1A1A;
+  --accent-color: #A1B0D0;
+}
+
+.species-page--big-nose-horns {
+  background-color: #E0CC8D;
+  color: #1A1A1A;
+  --accent-color: #8D9BE0;
+}
+
+.species-page--chimeras {
+  background-color: #D3AF37;
+  color: #1A1A1A;
+  --accent-color: #375AD3;
+}
+
+.species-page--coelacanths {
+  background-color: #CC775C;
+  color: #FAFAFA;
+  --accent-color: #5C94CC;
+}
+
+.species-page--deep-bodied-ray-finned-fishes {
+  background-color: #E59500;
+  color: #1A1A1A;
+  --accent-color: #004AE5;
+}
+
+.species-page--early-&-flightless-birds {
+  background-color: #FCECC9;
+  color: #1A1A1A;
+  --accent-color: #C9DFCE;
+}
+
+.species-page--early-amphibians {
+  background-color: #81A49B;
+  color: #FAFAFA;
+  --accent-color: #A4818A;
+}
+
+.species-page--early-aquatic-reptiles {
+  background-color: #A5D6A7;
+  color: #1A1A1A;
+  --accent-color: #D6A5D4;
+}
+
+.species-page--early-archosauromorphs {
+  background-color: #C3D9A8;
+  color: #1A1A1A;
+  --accent-color: #D9C3A8;
+}
+
+.species-page--early-ceratopsians {
+  background-color: #B3A369;
+  color: #1A1A1A;
+  --accent-color: #6973B3;
+}
+
+.species-page--early-crocodiles {
+  background-color: #D2B48C;
+  color: #1A1A1A;
+  --accent-color: #8CADD2;
+}
+
+.species-page--early-frogs {
+  background-color: #7EB25E;
+  color: #1A1A1A;
+  --accent-color: #B27E92;
+}
+
+.species-page--early-lizards-&-gliders {
+  background-color: #E8E4C0;
+  color: #1A1A1A;
+  --accent-color: #C0C4E8;
+}
+
+.species-page--early-marine-diapsids {
+  background-color: #A2D8D6;
+  color: #1A1A1A;
+  --accent-color: #D8A2A4;
+}
+
+.species-page--early-parareptiles {
+  background-color: #F0EAD6;
+  color: #1A1A1A;
+  --accent-color: #D6E0F0;
+}
+
+.species-page--early-sea-snakes {
+  background-color: #9AD7A1;
+  color: #1A1A1A;
+  --accent-color: #D79A8F;
+}
+
+.species-page--fabrosaurs {
+  background-color: #E9D2C4;
+  color: #1A1A1A;
+  --accent-color: #C4DAE9;
+}
+
+.species-page--famous-north-american-sauropods {
+  background-color: #C45B3A;
+  color: #FAFAFA;
+  --accent-color: #3AC45B;
+}
+
+.species-page--fleshy-lobed-fishes {
+  background-color: #D18E5E;
+  color: #1A1A1A;
+  --accent-color: #5E8DD1;
+}
+
+.species-page--giant-crocodiles {
+  background-color: #B39A86;
+  color: #1A1A1A;
+  --accent-color: #869BB3;
+}
+
+.species-page--giant-predators {
+  background-color: #A44A3F;
+  color: #FAFAFA;
+  --accent-color: #3F9AA4;
+}
+
+.species-page--heterodontosaurs {
+  background-color: #EFE6E0;
+  color: #1A1A1A;
+  --accent-color: #E0EFE9;
+}
+
+.species-page--ichthyosaurs {
+  background-color: #85C2C4;
+  color: #1A1A1A;
+  --accent-color: #C48583;
+}
+
+.species-page--jawless-fishes {
+  background-color: #B88A4F;
+  color: #1A1A1A;
+  --accent-color: #4F7FB8;
+}
+
+.species-page--land-dwelling-diapsids {
+  background-color: #8C9C8C;
+  color: #1A1A1A;
+  --accent-color: #9C8C9C;
+}
+
+.species-page--long-tailed-pterosaurs {
+  background-color: #F7F4E5;
+  color: #1A1A1A;
+  --accent-color: #E5E8F7;
+}
+
+.species-page--lungfishes {
+  background-color: #DDA038;
+  color: #1A1A1A;
+  --accent-color: #3875DD;
+}
+
+.species-page--mosasaurs {
+  background-color: #77BFA3;
+  color: #1A1A1A;
+  --accent-color: #BF779D;
+}
+
+.species-page--nodosaurids {
+  background-color: #D9CCAA;
+  color: #1A1A1A;
+  --accent-color: #AADAEC;
+}
+
+.species-page--nothosaurs-the-swift-swimmers {
+  background-color: #9BBBC3;
+  color: #1A1A1A;
+  --accent-color: #C39D9B;
+}
+
+.species-page--ocean-dwelling-crocodiles {
+  background-color: #A4C9C3;
+  color: #1A1A1A;
+  --accent-color: #C9A4AA;
+}
+
+.species-page--pachycephalosaurs {
+  background-color: #EAA989;
+  color: #1A1A1A;
+  --accent-color: #89C7EA;
+}
+
+.species-page--placoderms {
+  background-color: #9D7858;
+  color: #FAFAFA;
+  --accent-color: #587D9D;
+}
+
+.species-page--placodonts-the-armored-cracker-jaws {
+  background-color: #8AA87D;
+  color: #FAFAFA;
+  --accent-color: #A88A9B;
+}
+
+.species-page--plesiosaurs {
+  background-color: #A2D0D0;
+  color: #1A1A1A;
+  --accent-color: #D0A2A2;
+}
+
+.species-page--pliosaurs {
+  background-color: #6A9394;
+  color: #FAFAFA;
+  --accent-color: #946A69;
+}
+
+.species-page--primitive-mammals-early-ancestors {
+  background-color: #D8C2B8;
+  color: #1A1A1A;
+  --accent-color: #B8D8C2;
+}
+
+.species-page--primitive-ray-finned-fishes {
+  background-color: #B39A4D;
+  color: #1A1A1A;
+  --accent-color: #4D66B3;
+}
+
+.species-page--prosauropods {
+  background-color: #C2C19E;
+  color: #1A1A1A;
+  --accent-color: #9E9FC2;
+}
+
+.species-page--rays {
+  background-color: #AF915E;
+  color: #1A1A1A;
+  --accent-color: #5E7CAF;
+}
+
+.species-page--sauropods-with-special-features {
+  background-color: #D47A6A;
+  color: #FAFAFA;
+  --accent-color: #6AD47A;
+}
+
+.species-page--sharks {
+  background-color: #9B6849;
+  color: #FAFAFA;
+  --accent-color: #497C9B;
+}
+
+.species-page--short-tailed-pterosaurs {
+  background-color: #F9F5DE;
+  color: #1A1A1A;
+  --accent-color: #DEDFF9;
+}
+
+.species-page--small-carnivores {
+  background-color: #E88D67;
+  color: #1A1A1A;
+  --accent-color: #67B7E8;
+}
+
+.species-page--stegosaurs {
+  background-color: #B7A380;
+  color: #1A1A1A;
+  --accent-color: #8094B7;
+}
+
+.species-page--synapsids {
+  background-color: #C49797;
+  color: #1A1A1A;
+  --accent-color: #97C4C4;
+}
+
+.species-page--the-ruling-reptiles {
+  background-color: #C7C3AA;
+  color: #1A1A1A;
+  --accent-color: #AAB0C7;
+}
+
+.species-page--therapsid-carnivores {
+  background-color: #A55745;
+  color: #FAFAFA;
+  --accent-color: #45A3A5;
+}
+
+.species-page--therapsid-herbivores {
+  background-color: #B9B682;
+  color: #1A1A1A;
+  --accent-color: #8285B9;
+}
+
+.species-page--tortoises {
+  background-color: #6E9C49;
+  color: #FAFAFA;
+  --accent-color: #9C6EBE;
+}
+
+.species-page--turtles {
+  background-color: #9FC187;
+  color: #1A1A1A;
+  --accent-color: #C19FBA;
+}
+
+.species-page--water-&-land-birds {
+  background-color: #F0DAA4;
+  color: #1A1A1A;
+  --accent-color: #A4C9F0;
+}
+

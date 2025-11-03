@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
+import SplashPage from './SplashPage'; // Import the SplashPage component
 
 const StartScreen = ({ setView }) => {
+    const [showSplash, setShowSplash] = useState(true);
+
+    const handleEnter = () => {
+        setShowSplash(false);
+    };
+
     const buttonStyle = {
         fontFamily: '"BBH Sans Hegarty", sans-serif',
         textTransform: 'uppercase',
@@ -11,6 +18,10 @@ const StartScreen = ({ setView }) => {
         cursor: 'pointer',
         padding: '1rem'
     };
+
+    if (showSplash) {
+        return <SplashPage onEnter={handleEnter} />;
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>

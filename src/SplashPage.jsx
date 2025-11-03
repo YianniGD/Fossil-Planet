@@ -1,11 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Lottie from 'lottie-react';
 import { MicrophoneIcon, StopIcon } from '../Icons';
 
 const SplashPage = ({ onEnter }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [animationData, setAnimationData] = useState(null);
   const audioRef = useRef(null);
 
   useEffect(() => {
+    fetch('/json/bg.json')
+      .then(response => response.json())
+      .then(data => setAnimationData(data));
+
     audioRef.current = new Audio('/audio/female_narrator.wav');
     audioRef.current.onended = () => {
       setIsPlaying(false);
@@ -28,6 +34,23 @@ const SplashPage = ({ onEnter }) => {
 
   return (
     <div className="splash-screen">
+      <div className="splash-background">
+        {animationData && <Lottie 
+          animationData={animationData} 
+                  loop={false} 
+                  speed={0.5}
+                  autoplay={true}rendererSettings={{
+          preserveAspectRatio: 'xMidYMid slice'
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%'
+        }}
+        />}
+      </div>
       <div className="splash-content">
         <h2>
           <span className="part-1" style={{ display: 'block' }}>Hey there, Explorer!</span>

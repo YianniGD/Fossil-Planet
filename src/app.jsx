@@ -6,16 +6,16 @@ import Globe from './Globe';
 import StartScreen from './StartScreen';
 import SpeciesPage from './SpeciesPage';
 import Timeline from './Timeline';
+import LoadingScreen from './LoadingScreen'; // Import the LoadingScreen component
 
 import FilterControls from './FilterControls';
 import About from './About'; // Import the About component
 import DigSitePage from './DigSitePage';
-import SplashPage from './SplashPage'; // Import the SplashPage component
 import DiggingGame from './DiggingGame'; // Import the DiggingGame component
 
 
 const App = () => {
-    const [showSplash, setShowSplash] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [selectedDigSite, setSelectedDigSite] = useState(null);
     const [allSpecies, setAllSpecies] = useState([]);
@@ -39,7 +39,7 @@ const App = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const response = await fetch('/species_index_full.json');
+                const response = await fetch('/json/species_index_full.json');
                 if (!response.ok) {
                     throw new Error('Failed to fetch prehistoric data');
                 }
@@ -56,8 +56,8 @@ const App = () => {
                 setCategories(categories);
 
                 const [regionsRes, mergedGeoRes] = await Promise.all([
-                    fetch('/new_prehistoric_data/regions.json'),
-                    fetch('/custom.min.simplified.merged.geo.json')
+                    fetch('/json/regions.json'),
+                    fetch('/json/custom.min.simplified.merged.geo.json')
                 ]);
                 const allRegions = await regionsRes.json();
                 const mergedGeoData = await mergedGeoRes.json();
@@ -72,6 +72,7 @@ const App = () => {
                 setLocationsData(locations);
                 setRegions(allRegions.filter(region => region.Region_Name !== 'Antarctica'));
                 setGeoData(mergedGeoData);
+                setIsLoading(false); // Set loading to false after all data is loaded
             } catch (error) {
                 console.error("Failed to load initial data:", error);
             }
@@ -160,28 +161,22 @@ const App = () => {
         };
     }, []);
 
-    const handleEnter = () => {
-        setShowSplash(false);
-    };
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
 
     return (
         <div>
-            {showSplash ? (
-                <SplashPage onEnter={handleEnter} />
-            ) : (
-                <>
-                    <button style={backButtonStyle} onClick={handleBackClick}>Back</button>
-                    <Routes>
-                        <Route path="/" element={<StartScreen setView={(view) => navigate(view)} />} />
-                        <Route path="/globe" element={<Globe showSpeciesPage={showSpeciesPage} showDigSitePage={showDigSitePage} locationsData={locationsData} regions={regions} geoData={geoData} currentRegionIndex={currentRegionIndex} onSelectRegion={setCurrentRegionIndex} />} />
-                        <Route path="/timeline" element={<><FilterControls eras={eras} epochs={epochs} categories={categories} onFilterChange={handleFilterChange} /><Timeline speciesData={filteredSpecies} showSpeciesPage={showSpeciesPage} /></>} />
-                        <Route path="/species/:speciesId" element={<SpeciesPage species={selectedSpecies} allSpecies={allSpecies} showDigSitePage={showDigSitePage} locationsData={locationsData} />} />
-                        <Route path="/dig-site/:digSiteName" element={<DigSitePage digSite={selectedDigSite} allSpecies={allSpecies} showSpeciesPage={showSpeciesPage} locationsData={locationsData} />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/digging-game" element={<DiggingGame />} />
-                    </Routes>
-                </>
-            )}
+            <button style={backButtonStyle} onClick={handleBackClick}>Back</button>
+            <Routes>
+                <Route path="/" element={<StartScreen setView={(view) => navigate(view)} />} />
+                <Route path="/globe" element={<Globe showSpeciesPage={showSpeciesPage} showDigSitePage={showDigSitePage} locationsData={locationsData} regions={regions} geoData={geoData} currentRegionIndex={currentRegionIndex} onSelectRegion={setCurrentRegionIndex} />} />
+                <Route path="/timeline" element={<><FilterControls eras={eras} epochs={epochs} categories={categories} onFilterChange={handleFilterChange} /><Timeline speciesData={filteredSpecies} showSpeciesPage={showSpeciesPage} /></>} />
+                <Route path="/species/:speciesId" element={<SpeciesPage species={selectedSpecies} allSpecies={allSpecies} showDigSitePage={showDigSitePage} locationsData={locationsData} />} />
+                <Route path="/dig-site/:digSiteName" element={<DigSitePage digSite={selectedDigSite} allSpecies={allSpecies} showSpeciesPage={showSpeciesPage} locationsData={locationsData} />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/digging-game" element={<DiggingGame />} />
+            </Routes>
         </div>
     );
 };

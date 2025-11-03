@@ -26,7 +26,7 @@ const Timeline = ({ speciesData, showSpeciesPage }) => {
     useEffect(() => {
         const loadTimelineData = async () => {
             try {
-                const response = await fetch('/new_prehistoric_data/data/timeline.json');
+                const response = await fetch('/json/timeline.json');
                 const data = await response.json();
                 setTimelineData(data);
             } catch (error) {
