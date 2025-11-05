@@ -294,8 +294,8 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                 {localSpecies.phonetic_spelling && <h2 style={{ fontStyle: 'italic', marginTop: '-10px' }}>{localSpecies.phonetic_spelling}</h2>}
             </div>
 
-            <div className="species-two-column" style={{ marginTop: 12, marginBottom: 18 }}>
-                <div className="species-text-col">
+            <div style={{ marginTop: 12, marginBottom: 18 }}>
+                <div>
                     <div>
                         {localSpecies.literal_translation && (
                             <div style={{ marginBottom: '1rem' }}>
@@ -345,94 +345,82 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                             </div>
                         )}
                     </div>
-
                 </div>
 
-                <div className="species-image-col">
-                    <div className="image-container">
-                        {/* X-Ray button intentionally removed — press-and-hold is enabled on the image area */}
+                <div className="image-container">
+                    <img src="/animals/human.webp" alt="human" className="xray-human-image" style={{ width: humanWidth }} />
+                    {/* X-Ray button intentionally removed — press-and-hold is enabled on the image area */}
+
+                    <div
+                        className={isXRayOpen ? 'xray-images xray-active' : 'xray-images'}
+                        ref={containerRef}
+                        onPointerDown={(e) => { e.preventDefault(); setIsXRayOpen(true); }}
+                        onPointerUp={() => {
+                            // when pointer is released inside the container, close X-Ray
+                            // but animate the lens away smoothly first
+                            const lensEl = lensRef.current;
+                            const EXIT_DURATION = 220;
+                            if (lensEl) {
+                                lensEl.classList.add('edge-exit');
+                                setTimeout(() => setIsXRayOpen(false), EXIT_DURATION + 40);
+                            } else {
+                                setIsXRayOpen(false);
+                            }
+                        }}
+                        onPointerCancel={() => setIsXRayOpen(false)}
+                    >
+                        {/* SVG filter for subtle distortion applied to the blurred rim layer */}
+                        <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+                            <defs>
+                                <filter id="xray-distort-filter" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="2" seed="23" result="noise" />
+                                    <feGaussianBlur in="noise" stdDeviation="2" result="blurredNoise" />
+                                    <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+                                </filter>
+                            </defs>
+                        </svg>
+
+                        {/* <img
+                            src="/images/background.png"
+                            alt="Background"
+                            className="species-background"
+                        /> */}
+
+                        {localSpecies.image_url && localSpecies.image_url.image && (
+                            <img
+                                src={`/${localSpecies.image_url.image}`}
+                                alt={localSpecies.name || localSpecies.id}
+                                className="xray-specimen-image"
+                                style={{ width: `${speciesWidth}px` }}
+                            />
+                        )}
+
+                        {localSpecies.image_url && localSpecies.image_url.xray_image && (
+                            <>
+                                <img
+                                    ref={blurRef}
+                                    src={`/${localSpecies.image_url.xray_image}`}
+                                    alt={`${localSpecies.name || localSpecies.id} Skeleton (blur)`}
+                                    className="xray-specimen-blur"
+                                    style={{ width: `${speciesWidth}px` }}
+                                />
+                                <img
+                                    ref={skeletonRef}
+                                    src={`/${localSpecies.image_url.xray_image}`}
+                                    alt={`${localSpecies.name || localSpecies.id} Skeleton`}
+                                    className="xray-specimen-skeleton"
+                                    style={{ width: `${speciesWidth}px` }}
+                                />
+                            </>                            
+                        )}
 
                         <div
-                            className={isXRayOpen ? 'xray-images xray-active' : 'xray-images'}
-                            ref={containerRef}
-                            onPointerDown={(e) => { e.preventDefault(); setIsXRayOpen(true); }}
-                            onPointerUp={() => {
-                                // when pointer is released inside the container, close X-Ray
-                                // but animate the lens away smoothly first
-                                const lensEl = lensRef.current;
-                                const EXIT_DURATION = 220;
-                                if (lensEl) {
-                                    lensEl.classList.add('edge-exit');
-                                    setTimeout(() => setIsXRayOpen(false), EXIT_DURATION + 40);
-                                } else {
-                                    setIsXRayOpen(false);
-                                }
-                            }}
-                            onPointerCancel={() => setIsXRayOpen(false)}
-                        >
-                            {/* SVG filter for subtle distortion applied to the blurred rim layer */}
-                            <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-                                <defs>
-                                    <filter id="xray-distort-filter" x="-20%" y="-20%" width="140%" height="140%">
-                                        <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="2" seed="23" result="noise" />
-                                        <feGaussianBlur in="noise" stdDeviation="2" result="blurredNoise" />
-                                        <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="18" xChannelSelector="R" yChannelSelector="G" />
-                                    </filter>
-                                </defs>
-                            </svg>
+                            ref={lensRef}
+                            className="xray-lens"
+                            aria-hidden="true"
+                        />
 
-                            <img
-                                src="/images/background.png"
-                                alt="Background"
-                                className="species-background"
-                            />
 
-                            {localSpecies.image_url && localSpecies.image_url.image && (
-                                <img
-                                    src={`/${localSpecies.image_url.image}`}
-                                    alt={localSpecies.name || localSpecies.id}
-                                    className="xray-specimen-image"
-                                />
-                            )}
-
-                            {isXRayOpen && localSpecies.image_url && localSpecies.image_url.xray_image && (
-                                <>
-                                    <img
-                                        ref={blurRef}
-                                        src={`/${localSpecies.image_url.xray_image}`}
-                                        alt={`${localSpecies.name || localSpecies.id} Skeleton (blur)`}
-                                        className="xray-specimen-blur"
-                                    />
-                                    <img
-                                        ref={skeletonRef}
-                                        src={`/${localSpecies.image_url.xray_image}`}
-                                        alt={`${localSpecies.name || localSpecies.id} Skeleton`}
-                                        className="xray-specimen-skeleton"
-                                    />
-                                </>
-                            )}
-
-                            {isXRayOpen && (
-                                <div
-                                    ref={lensRef}
-                                    className="xray-lens"
-                                    aria-hidden="true"
-                                />
-                            )}
-
-                            <div className="species-foreground-animation">
-                                <Lottie
-                                    animationData={fgAnimation}
-                                    className="lottie-foreground"
-                                    style={{ width: '100%', height: '100%' }}
-                                />
-                            </div>
-                            <img
-                                src="/images/foreground.png"
-                                alt="Foreground"
-                                className="species-foreground"
-                            />
-                        </div>
                     </div>
                 </div>
             </div>
