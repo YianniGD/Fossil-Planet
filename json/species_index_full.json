@@ -13390,8 +13390,8 @@
         "name": "Yinlong Downsi",
         "description": "a small, early horned dinosaur",
         "image_url": {
-            "image": "public/animals/main/Yinlong Downsi.webp",
-            "xray_image": "public/animals/skeleton/Yinlong Downsi_skeleton.webp"
+            "image": "public/animals/main/Yinlong_Downsi.webp",
+            "xray_image": "public/animals/skeleton/Yinlong_Downsi_skeleton.webp"
         },
         "naming": {
             "phonetic_spelling": "yin-long DOWNS-ee",
@@ -13425,7 +13425,7 @@
         "region": [
             "Asia"
         ],
-        "icon": "public/animals/icons/Yinlong Downsiicon.webp"
+        "icon": "public/animals/icons/Yinlong_Downsiicon.webp"
     },
     {
         "id": "Zalambdalestes",

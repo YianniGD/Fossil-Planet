@@ -274,6 +274,19 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
         return <div>Species not found.</div>;
     }
 
+    const HUMAN_FEET = 1.4;
+    const speciesFeet = localSpecies.size.feet;
+    let speciesWidth, humanWidth;
+    const MAX_WIDTH = 800; // px
+
+    if (speciesFeet > HUMAN_FEET) {
+        speciesWidth = MAX_WIDTH;
+        humanWidth = (HUMAN_FEET / speciesFeet) * MAX_WIDTH;
+    } else {
+        humanWidth = MAX_WIDTH;
+        speciesWidth = (speciesFeet / HUMAN_FEET) * MAX_WIDTH;
+    }
+
     return (
         <div className={`species-page ${subcategoryClassName}`} style={{ padding: '28px', height: '100vh', boxSizing: 'border-box', overflow: 'hidden', fontSize: '18px', lineHeight: 1.4 }}>
             <div style={{ textAlign: 'right' }}>
@@ -298,7 +311,7 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                             {localSpecies.id} {phrases.livedDuring} the {localSpecies.epoch} epoch of the {localSpecies.eras && localSpecies.eras.join(', ')} era. <br />
                             {phrases.aMemberOf} the {localSpecies.categories && localSpecies.categories.length > 0 && localSpecies.categories[0].primary} as one of the {localSpecies.categories && localSpecies.categories.length > 0 && localSpecies.categories[0].subcategory}, <br />
                             {phrases.itWas} {localSpecies.description}, {phrases.knownFor} {localSpecies.size.feet} feet ({localSpecies.size.meters} meters) long! <br />
-                            {phrases.firstFossils} the {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].dig_site} in {localSpecies.discovery_locations && local.discovery_locations.length > 0 && localSpecies.discovery_locations[0].region}.
+                            {phrases.firstFossils} the {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].dig_site} in {localSpecies.discovery_locations && localSpecies.discovery_locations.length > 0 && localSpecies.discovery_locations[0].region}.
                         </p>
                         
                         {localSpecies.discovery_locations && (
@@ -332,6 +345,7 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                             </div>
                         )}
                     </div>
+
                 </div>
 
                 <div className="species-image-col">

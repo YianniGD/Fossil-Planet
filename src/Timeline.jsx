@@ -170,7 +170,7 @@ const Timeline = ({ speciesData, showSpeciesPage }) => {
         path.tension = 0.5;
         pathRef.current = path;
 
-        var geometry = new THREE.TubeGeometry(path, 300, 4, 32, false);
+        var geometry = new THREE.TubeGeometry(path, 300, 6, 32, false);
         var textureLoader = new THREE.TextureLoader();
 
         var texture = textureLoader.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/68819/3d_space_5.jpg', function (texture) {
@@ -312,7 +312,7 @@ const Timeline = ({ speciesData, showSpeciesPage }) => {
                 material.map = texture;
                 material.needsUpdate = true;
                 const aspect = texture.image.naturalWidth / texture.image.naturalHeight;
-                const scale = 2;
+                const scale = 1;
                 sprite.scale.set(scale * aspect, scale, 1);
             });
 
