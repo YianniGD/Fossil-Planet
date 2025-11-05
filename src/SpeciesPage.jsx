@@ -375,7 +375,7 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
 
                             {localSpecies.image_url && localSpecies.image_url.image && (
                                 <img
-                                    src={`/images/Dinosaurs/${localSpecies.image_url.image}`}
+                                    src={`/${localSpecies.image_url.image}`}
                                     alt={localSpecies.name || localSpecies.id}
                                     className="xray-specimen-image"
                                 />
@@ -385,13 +385,13 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                                 <>
                                     <img
                                         ref={blurRef}
-                                        src={`/images/Dinosaurs/${localSpecies.image_url.xray_image}`}
+                                        src={`/${localSpecies.image_url.xray_image}`}
                                         alt={`${localSpecies.name || localSpecies.id} Skeleton (blur)`}
                                         className="xray-specimen-blur"
                                     />
                                     <img
                                         ref={skeletonRef}
-                                        src={`/images/Dinosaurs/${localSpecies.image_url.xray_image}`}
+                                        src={`/${localSpecies.image_url.xray_image}`}
                                         alt={`${localSpecies.name || localSpecies.id} Skeleton`}
                                         className="xray-specimen-skeleton"
                                     />

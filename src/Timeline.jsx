@@ -286,7 +286,7 @@ const Timeline = ({ speciesData, showSpeciesPage }) => {
                 return null;
             }
 
-            const iconPath = `/images/Dinosaurs/icons/${species.icon || 'slice2.png'}`;
+                        const iconPath = `/${species.icon || 'slice2.webp'}`;
 
             const speciesMa = species.time_period.lived_from_ma;
             const pathPercentage = 1 - mathUtilsRef.current.normalize(speciesMa, minMa, maxMa);
