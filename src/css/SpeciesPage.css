@@ -85,7 +85,7 @@
   object-fit: contain;
   object-position: center bottom;
   pointer-events: none;
-  z-index: 3; 
+  z-index: 2; 
   filter: blur(6px) saturate(110%) contrast(100%);
   opacity: 0;
   transition: opacity 160ms ease-out;
@@ -106,7 +106,7 @@
   transform: translate(-50%, -50%);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 5; /* between skeleton (4) and foreground (6) */
+  z-index: 3; /* between skeleton (4) and foreground (6) */
   opacity: 0;
   transition: left 120ms cubic-bezier(.2,.9,.2,1), top 120ms cubic-bezier(.2,.9,.2,1), opacity 160ms ease-out, width 120ms ease-out, height 120ms ease-out, transform 160ms ease-out, box-shadow 160ms ease-out;
   /* base glass outline (no backdrop blur on center) */
@@ -214,7 +214,7 @@
   background-color: #004AE5;
 }
 
-.species-page--early-&-flightless-birds {
+.species-page--early-and-flightless-birds {
   --accent-color: #FCECC9;
   color: #1A1A1A;
   background-color: #C9DFCE;
@@ -256,7 +256,7 @@
   background-color: #B27E92;
 }
 
-.species-page--early-lizards-&-gliders {
+.species-page--early-lizards-and-gliders {
   --accent-color: #E8E4C0;
   color: #1A1A1A;
   background-color: #C0C4E8;
@@ -490,7 +490,7 @@
   background-color: #C19FBA;
 }
 
-.species-page--water-&-land-birds {
+.species-page--water-and-land-birds {
   --accent-color: #F0DAA4;
   color: #1A1A1A;
   background-color: #A4C9F0;

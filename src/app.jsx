@@ -13,6 +13,9 @@ import About from './About'; // Import the About component
 import DigSitePage from './DigSitePage';
 import DiggingGame from './DiggingGame'; // Import the DiggingGame component
 
+import speciesData from '../json/species_index_full.json';
+import allRegions from '../json/regions.json';
+import mergedGeoData from '../json/custom.min.simplified.merged.geo.json';
 
 const App = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -37,47 +40,31 @@ const App = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                const response = await fetch('/json/species_index_full.json');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch prehistoric data');
-                }
-                const speciesData = await response.json();
+        try {
+            const eras = [...new Set(speciesData.flatMap(s => s.eras))];
+            const epochs = [...new Set(speciesData.map(s => s.epoch))];
+            const categories = [...new Set(speciesData.flatMap(s => (s.categories || []).map(c => c.primary)))];
 
-                const eras = [...new Set(speciesData.flatMap(s => s.eras))];
-                const epochs = [...new Set(speciesData.map(s => s.epoch))];
-                const categories = [...new Set(speciesData.flatMap(s => (s.categories || []).map(c => c.primary)))];
+            setAllSpecies(speciesData);
+            setFilteredSpecies(speciesData);
+            setEras(eras);
+            setEpochs(epochs);
+            setCategories(categories);
 
-                setAllSpecies(speciesData);
-                setFilteredSpecies(speciesData);
-                setEras(eras);
-                setEpochs(epochs);
-                setCategories(categories);
+            const locations = mergedGeoData.features.flatMap(feature => 
+                (feature.properties.dig_sites || []).map(site => ({
+                    ...site,
+                    coords: geoCentroid(feature)
+                }))
+            );
 
-                const [regionsRes, mergedGeoRes] = await Promise.all([
-                    fetch('/json/regions.json'),
-                    fetch('/json/custom.min.simplified.merged.geo.json')
-                ]);
-                const allRegions = await regionsRes.json();
-                const mergedGeoData = await mergedGeoRes.json();
-
-                const locations = mergedGeoData.features.flatMap(feature => 
-                    (feature.properties.dig_sites || []).map(site => ({
-                        ...site,
-                        coords: geoCentroid(feature)
-                    }))
-                );
-
-                setLocationsData(locations);
-                setRegions(allRegions.filter(region => region.Region_Name !== 'Antarctica'));
-                setGeoData(mergedGeoData);
-                setIsLoading(false); // Set loading to false after all data is loaded
-            } catch (error) {
-                console.error("Failed to load initial data:", error);
-            }
-        };
-        loadData();
+            setLocationsData(locations);
+            setRegions(allRegions.filter(region => region.Region_Name !== 'Antarctica'));
+            setGeoData(mergedGeoData);
+            setIsLoading(false); // Set loading to false after all data is loaded
+        } catch (error) {
+            console.error("Failed to load initial data:", error);
+        }
     }, []);
 
     const handleFilterChange = (filterType, value) => {
