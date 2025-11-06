@@ -5,7 +5,7 @@ import App from './app.jsx';
 import './css/style.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <BrowserRouter>
+    <BrowserRouter basename="/Fossil-Planet/">
       <App />
     </BrowserRouter>
 );
