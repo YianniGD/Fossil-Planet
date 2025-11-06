@@ -5,6 +5,8 @@
   justify-content: space-around;
   width: 100%;
   height: 60vh;
+  position: relative;
+  margin-top: -200px;
 }
 
 /* Shared XRay/specimen image rules used on the Species page */
@@ -35,6 +37,7 @@
   transform: translate(0, 0);
   margin: 0;
   padding: 0;
+  user-select: none;
 }
 
 .species-background {
@@ -90,6 +93,7 @@
   opacity: 0;
   transition: opacity 160ms ease-out;
   will-change: opacity;
+  user-select: none;
 }
 
 /* When X-Ray is active apply a subtle displacement/distortion to the blurred rim */
@@ -498,6 +502,6 @@
 
 .xray-human-image {
   display: block;
-  position: relative;
   align-self: flex-end;
+  user-select: none;
 }

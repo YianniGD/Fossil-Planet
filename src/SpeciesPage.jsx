@@ -355,7 +355,7 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                 {localSpecies.phonetic_spelling && <h2 style={{ fontStyle: 'italic', marginTop: '-10px' }}>{localSpecies.phonetic_spelling}</h2>}
             </div>
 
-            <div style={{ marginTop: 12, marginBottom: 18 }}>
+            <div style={{ marginTop: 12, marginBottom: 18, position: 'relative', zIndex: 1 }}>
                 <div>
                     <div>
                         {localSpecies.literal_translation && (
@@ -408,8 +408,15 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                     </div>
                 </div>
 
+                <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+                    <p style={{ fontSize: '1rem', fontFamily: '"BBH Sans Hegarty", sans-serif', textTransform: 'uppercase', color: 'white', margin: 0 }}>
+                        Want a deeper look?<br/>
+                        Tap and hold!
+                    </p>
+                </div>
+
                 <div className="image-container">
-                    <img src={import.meta.env.BASE_URL + "animals/human.webp"} alt="human" className="xray-human-image" style={{ width: humanWidth }} />
+                    <img src={import.meta.env.BASE_URL + "animals/human.webp"} alt="human" className="xray-human-image" style={{ width: humanWidth, zIndex: -1 }} />
                     {/* X-Ray button intentionally removed — press-and-hold is enabled on the image area */}
 
                     <div

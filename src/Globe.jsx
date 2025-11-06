@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import * as d3 from 'd3';
 import RegionControls from './RegionControls';
 
@@ -376,6 +377,12 @@ const Globe = ({ locationsData, regions, currentRegionIndex, geoData, onSelectRe
 
     return (
         <>
+            <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 101 }}>
+                <Link to="/timeline" style={{ color: 'white', textDecoration: 'none', fontFamily: '"BBH Sans Hegarty", sans-serif', fontSize: '1.5rem' }}>Timeline</Link>
+            </div>
+            <div style={{ position: 'absolute', bottom: '120px', left: '20px', zIndex: 101 }}>
+                <Link to="/about" style={{ color: 'white', textDecoration: 'none', fontFamily: '"BBH Sans Hegarty", sans-serif', fontSize: '1.5rem' }}>About</Link>
+            </div>
             <div style={{ width: '100%', height: '100vh' }}>
                 <canvas ref={canvasRef} width={size.width} height={size.height} />
                 <svg ref={svgRef} width={size.width} height={size.height} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
