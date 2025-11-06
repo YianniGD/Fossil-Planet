@@ -81,49 +81,87 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
     const lensRef = useRef(null);
     const blurRef = useRef(null);
     const lensTimeoutRef = useRef(null);
-        const audioRef = useRef(null);
-        const isHoveringRef = useRef(false);
+    const audioRef = useRef(null);
+    const userHasInteracted = useRef(false);
 
-        // Initialize audio
-        useEffect(() => {
-            audioRef.current = new Audio('/audio/AFX_SCANNINGRAY_DFMG.wav');
-            audioRef.current.loop = true;
-            return () => {
-                if (audioRef.current) {
-                    audioRef.current.pause();
-                    audioRef.current = null;
+    // Initialize audio
+    useEffect(() => {
+        audioRef.current = new Audio('/audio/AFX_SCANNINGRAY_DFMG.wav');
+        audioRef.current.loop = true;
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, []);
+
+    // Unlock audio on first user interaction
+    useEffect(() => {
+        const unlockAudio = () => {
+            if (audioRef.current && !userHasInteracted.current) {
+                const playPromise = audioRef.current.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        audioRef.current.pause();
+                    }).catch(error => {
+                        console.error("Audio unlock failed:", error);
+                    });
                 }
-            };
-        }, []);
+                userHasInteracted.current = true;
+            }
+            window.removeEventListener('pointerdown', unlockAudio);
+        };
 
-        useEffect(() => {
-            if (!isXRayOpen) return;
-            const container = containerRef.current;
-            const skeletonEl = skeletonRef.current;
-    if (!container || !skeletonEl) return;
-    const lensEl = lensRef.current;
+        window.addEventListener('pointerdown', unlockAudio);
 
-    // When the user releases the pointer anywhere, animate the lens away then close X-Ray
-    const handleGlobalPointerUp = (ev) => {
-        const EXIT_DURATION = 220;
-        const lensElLocal = lensRef.current;
-        if (lensElLocal) {
-            lensElLocal.classList.add('edge-exit');
-            // schedule closing X-Ray after animation
-            if (lensTimeoutRef.current) clearTimeout(lensTimeoutRef.current);
-            lensTimeoutRef.current = setTimeout(() => {
-                setIsXRayOpen(false);
-                if (lensRef.current) {
-                    lensRef.current.style.opacity = '0';
-                    lensRef.current.classList.remove('edge-exit');
-                }
-                lensTimeoutRef.current = null;
-            }, EXIT_DURATION + 40);
-        } else {
-            setIsXRayOpen(false);
+        return () => {
+            window.removeEventListener('pointerdown', unlockAudio);
+        };
+    }, []);
+
+    const handleXRayPointerDown = (e) => {
+        e.preventDefault();
+        setIsXRayOpen(true);
+        if (audioRef.current && userHasInteracted.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(error => {
+                console.error("Audio play failed:", error);
+            });
         }
     };
-    window.addEventListener('pointerup', handleGlobalPointerUp);
+
+    useEffect(() => {
+        if (!isXRayOpen) return;
+        const container = containerRef.current;
+        const skeletonEl = skeletonRef.current;
+        if (!container || !skeletonEl) return;
+        const lensEl = lensRef.current;
+
+        // When the user releases the pointer anywhere, animate the lens away then close X-Ray
+        const handleGlobalPointerUp = (ev) => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+            const EXIT_DURATION = 220;
+            const lensElLocal = lensRef.current;
+            if (lensElLocal) {
+                lensElLocal.classList.add('edge-exit');
+                // schedule closing X-Ray after animation
+                if (lensTimeoutRef.current) clearTimeout(lensTimeoutRef.current);
+                lensTimeoutRef.current = setTimeout(() => {
+                    setIsXRayOpen(false);
+                    if (lensRef.current) {
+                        lensRef.current.style.opacity = '0';
+                        lensRef.current.classList.remove('edge-exit');
+                    }
+                    lensTimeoutRef.current = null;
+                }, EXIT_DURATION + 40);
+            } else {
+                setIsXRayOpen(false);
+            }
+        };
+        window.addEventListener('pointerup', handleGlobalPointerUp);
 
         let rafId = null;
         let lastX = 0;
@@ -194,13 +232,6 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                         // silent fail — do not block pointer handling
                     }
                 }
-                
-                    // Start audio if not already playing
-                    if (!isHoveringRef.current && audioRef.current) {
-                        audioRef.current.currentTime = 0;
-                        audioRef.current.play();
-                        isHoveringRef.current = true;
-                    }
 
                 lastX = x;
                 lastY = y;
@@ -212,35 +243,34 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
         container.addEventListener('mousemove', handlePointerMove);
         container.addEventListener('touchmove', handlePointerMove);
         
-            const handlePointerLeave = () => {
-                if (audioRef.current) {
-                    audioRef.current.pause();
-                    isHoveringRef.current = false;
-                }
-                skeletonEl.style.opacity = '0';
-                // collapse clip-path back to 0% so enabling X-Ray later doesn't show a centered reveal
-                skeletonEl.style.clipPath = 'circle(0% at 50% 50%)';
-                if (lensEl) {
-                    // animate lens away smoothly when pointer leaves
-                    lensEl.classList.add('edge-exit');
-                    // after the CSS transition finishes, hide and reset
-                    const EXIT_DURATION = 220; // ms, keep in sync with CSS transition
-                    if (lensTimeoutRef.current) clearTimeout(lensTimeoutRef.current);
-                    lensTimeoutRef.current = setTimeout(() => {
-                        try {
-                            lensEl.style.opacity = '0';
-                            lensEl.classList.remove('edge-exit');
-                        } catch (e) {}
-                        lensTimeoutRef.current = null;
-                    }, EXIT_DURATION + 40);
-                }
-                if (blurRef.current) {
-                    blurRef.current.style.opacity = '0';
-                }
-            };
+        const handlePointerLeave = () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+            skeletonEl.style.opacity = '0';
+            // collapse clip-path back to 0% so enabling X-Ray later doesn't show a centered reveal
+            skeletonEl.style.clipPath = 'circle(0% at 50% 50%)';
+            if (lensEl) {
+                // animate lens away smoothly when pointer leaves
+                lensEl.classList.add('edge-exit');
+                // after the CSS transition finishes, hide and reset
+                const EXIT_DURATION = 220; // ms, keep in sync with CSS transition
+                if (lensTimeoutRef.current) clearTimeout(lensTimeoutRef.current);
+                lensTimeoutRef.current = setTimeout(() => {
+                    try {
+                        lensEl.style.opacity = '0';
+                        lensEl.classList.remove('edge-exit');
+                    } catch (e) {}
+                    lensTimeoutRef.current = null;
+                }, EXIT_DURATION + 40);
+            }
+            if (blurRef.current) {
+                blurRef.current.style.opacity = '0';
+            }
+        };
 
-            container.addEventListener('mouseleave', handlePointerLeave);
-            container.addEventListener('pointerleave', handlePointerLeave);
+        container.addEventListener('mouseleave', handlePointerLeave);
+        container.addEventListener('pointerleave', handlePointerLeave);
 
         return () => {
             if (rafId) {
@@ -249,24 +279,23 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
             container.removeEventListener('pointermove', handlePointerMove);
             container.removeEventListener('mousemove', handlePointerMove);
             container.removeEventListener('touchmove', handlePointerMove);
-                container.removeEventListener('mouseleave', handlePointerLeave);
-                container.removeEventListener('pointerleave', handlePointerLeave);
-                window.removeEventListener('pointerup', handleGlobalPointerUp);
-                if (skeletonEl) {
-                    skeletonEl.style.clipPath = 'circle(0% at 50% 50%)';
-                    skeletonEl.style.opacity = '0';
-                }
-                if (audioRef.current) {
-                    audioRef.current.pause();
-                    isHoveringRef.current = false;
-                }
-                if (lensEl) {
-                    lensEl.classList.remove('edge-exit');
-                }
-                if (lensTimeoutRef.current) {
-                    clearTimeout(lensTimeoutRef.current);
-                    lensTimeoutRef.current = null;
-                }
+            container.removeEventListener('mouseleave', handlePointerLeave);
+            container.removeEventListener('pointerleave', handlePointerLeave);
+            window.removeEventListener('pointerup', handleGlobalPointerUp);
+            if (skeletonEl) {
+                skeletonEl.style.clipPath = 'circle(0% at 50% 50%)';
+                skeletonEl.style.opacity = '0';
+            }
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+            if (lensEl) {
+                lensEl.classList.remove('edge-exit');
+            }
+            if (lensTimeoutRef.current) {
+                clearTimeout(lensTimeoutRef.current);
+                lensTimeoutRef.current = null;
+            }
         };
     }, [isXRayOpen]);
 
@@ -354,8 +383,11 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                     <div
                         className={isXRayOpen ? 'xray-images xray-active' : 'xray-images'}
                         ref={containerRef}
-                        onPointerDown={(e) => { e.preventDefault(); setIsXRayOpen(true); }}
+                        onPointerDown={handleXRayPointerDown}
                         onPointerUp={() => {
+                            if (audioRef.current) {
+                                audioRef.current.pause();
+                            }
                             // when pointer is released inside the container, close X-Ray
                             // but animate the lens away smoothly first
                             const lensEl = lensRef.current;
@@ -367,7 +399,12 @@ const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) =>
                                 setIsXRayOpen(false);
                             }
                         }}
-                        onPointerCancel={() => setIsXRayOpen(false)}
+                        onPointerCancel={() => {
+                            setIsXRayOpen(false);
+                            if (audioRef.current) {
+                                audioRef.current.pause();
+                            }
+                        }}
                     >
                         {/* SVG filter for subtle distortion applied to the blurred rim layer */}
                         <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
