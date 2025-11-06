@@ -286,7 +286,8 @@ const Timeline = ({ speciesData, showSpeciesPage }) => {
                 return null;
             }
 
-                        const iconPath = `/${species.icon || 'slice2.webp'}`;
+                        const iconPath = import.meta.env.BASE_URL + `${species.icon || 'slice2.webp'}`;
+
 
             const speciesMa = species.time_period.lived_from_ma;
             const pathPercentage = 1 - mathUtilsRef.current.normalize(speciesMa, minMa, maxMa);

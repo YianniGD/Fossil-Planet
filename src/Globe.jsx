@@ -58,7 +58,7 @@ const Globe = ({ locationsData, regions, currentRegionIndex, geoData, onSelectRe
                     name: location.Location_Name,
                     description: location.description,
                     isLocation: true,
-                    imageUrl: `/images/site_${randomImageId}.webp`
+                    imageUrl: import.meta.env.BASE_URL + `images/site_${randomImageId}.webp`
                 };
             }).filter(Boolean);
             setMarkers(locationMarkers);
