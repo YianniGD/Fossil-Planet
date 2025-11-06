@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import './css/SpeciesPage.css';
-import speciesIndex from '../json/species_index_full.json';
-import fgAnimation from '../json/fg.json';
+import speciesIndex from './data/species_index_full.json';
+import fgAnimation from './data/fg.json';
 
 const SpeciesPage = ({ species, allSpecies, showDigSitePage, locationsData }) => {
     const { speciesId } = useParams();

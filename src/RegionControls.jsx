@@ -35,7 +35,7 @@ const RegionControls = ({ regions, onSelectRegion, currentRegionIndex, onViewCha
               gap: '5px'
             }}
           >
-            <img src={`/images/${region.Region_Name}.webp`} alt={region.Region_Name} style={{ width: '50px', height: '50px' }} />
+            <img src={`${import.meta.env.BASE_URL}/images/${region.Region_Name}.webp`} alt={region.Region_Name} style={{ width: '50px', height: '50px' }} />
             <div style={{ fontFamily: '"BBH Sans Hegarty", sans-serif' }}>{region.Region_Name}</div>
           </button>
         ))}

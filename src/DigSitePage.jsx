@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
-const DigSitePage = ({ digSite, allSpecies, showSpeciesPage }) => {
+const DigSitePage = ({ locationsData }) => {
+    const [digSite, setDigSite] = useState(null);
+    const { digSiteName } = useParams();
+
+    useEffect(() => {
+        if (locationsData && digSiteName) {
+            const foundDigSite = locationsData.find(site => site.Location_Name === digSiteName);
+            setDigSite(foundDigSite);
+        }
+    }, [locationsData, digSiteName]);
+
     if (!digSite) {
         return <div>Dig site not found.</div>;
     }
-
-    const foundSpecies = allSpecies.filter(species =>
-        species.discovery_locations?.some(loc => loc.dig_site === digSite.name)
-    );
 
     return (
         <div style={{ padding: '20px', color: 'white' }}>
@@ -20,24 +27,9 @@ const DigSitePage = ({ digSite, allSpecies, showSpeciesPage }) => {
                 <li><strong>Latitude:</strong> {digSite.coords[1]}</li>
                 <li><strong>Longitude:</strong> {digSite.coords[0]}</li>
             </ul>
-
-            {foundSpecies.length > 0 && (
-                <div>
-                    <h2>Species Found</h2>
-                    <ul>
-                        {foundSpecies.map((s, index) => (
-                            <li
-                                key={index}
-                                onClick={() => showSpeciesPage(s.id)}
-                            >
-                                {s.id}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
         </div>
     );
 };
+
 
 export default DigSitePage;

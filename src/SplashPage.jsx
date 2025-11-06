@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Lottie from 'lottie-react';
 import { MicrophoneIcon, StopIcon } from '../Icons';
-import bgAnimation from '../json/bg.json';
+import bgAnimation from './data/bg.json';
 
 const SplashPage = ({ onEnter }) => {
   const [isPlaying, setIsPlaying] = useState(false);

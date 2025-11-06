@@ -11,22 +11,22 @@ import LoadingScreen from './LoadingScreen'; // Import the LoadingScreen compone
 import FilterControls from './FilterControls';
 import About from './About'; // Import the About component
 import DigSitePage from './DigSitePage';
-import DiggingGame from './DiggingGame'; // Import the DiggingGame component
 
-import speciesData from '../json/species_index_full.json';
-import allRegions from '../json/regions.json';
-import mergedGeoData from '../json/custom.min.simplified.merged.geo.json';
+import speciesData from './data/species_index_full.json';
+import allRegions from './data/regions.json';
+import mergedGeoData from './data/custom.min.simplified.merged.geo.json';
+import speciesByDigsiteData from './data/species_by_digsite.json';
 
 const App = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedSpecies, setSelectedSpecies] = useState(null);
-    const [selectedDigSite, setSelectedDigSite] = useState(null);
     const [allSpecies, setAllSpecies] = useState([]);
     const [filteredSpecies, setFilteredSpecies] = useState([]);
     const [regions, setRegions] = useState([]);
     const [locationsData, setLocationsData] = useState([]);
     const [geoData, setGeoData] = useState(null);
     const [currentRegionIndex, setCurrentRegionIndex] = useState(null);
+    const [speciesByDigsite, setSpeciesByDigsite] = useState([]);
     const [eras, setEras] = useState([]);
     const [epochs, setEpochs] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -51,13 +51,16 @@ const App = () => {
             setEpochs(epochs);
             setCategories(categories);
 
-            const locations = mergedGeoData.features.flatMap(feature => 
-                (feature.properties.dig_sites || []).map(site => ({
-                    ...site,
-                    coords: geoCentroid(feature)
-                }))
-            );
-
+                        const locations = mergedGeoData.features.flatMap(feature =>
+                            (feature.properties.dig_sites || []).map((site, index) => {
+                                const randomImageId = Math.floor(Math.random() * 6) + 1;
+                                return {
+                                    ...site,
+                                    name: site.Location_Name,
+                                    imageUrl: import.meta.env.BASE_URL + `images/site_${randomImageId}.webp`,
+                                    coords: geoCentroid(feature)
+                                };
+                            }))
             setLocationsData(locations);
             setRegions(allRegions.filter(region => region.Region_Name !== 'Antarctica'));
             setGeoData(mergedGeoData);
@@ -103,8 +106,7 @@ const App = () => {
     };
 
     const showDigSitePage = (digSite) => {
-        setSelectedDigSite(digSite);
-        navigate(`/dig-site/${digSite.Location_Name}`);
+        navigate(`/dig-site/${digSite.name}`);
     };
 
     const handleBackClick = () => {
@@ -160,9 +162,8 @@ const App = () => {
                 <Route path="/globe" element={<Globe showSpeciesPage={showSpeciesPage} showDigSitePage={showDigSitePage} locationsData={locationsData} regions={regions} geoData={geoData} currentRegionIndex={currentRegionIndex} onSelectRegion={setCurrentRegionIndex} />} />
                 <Route path="/timeline" element={<><FilterControls eras={eras} epochs={epochs} categories={categories} onFilterChange={handleFilterChange} /><Timeline speciesData={filteredSpecies} showSpeciesPage={showSpeciesPage} /></>} />
                 <Route path="/species/:speciesId" element={<SpeciesPage species={selectedSpecies} allSpecies={allSpecies} showDigSitePage={showDigSitePage} locationsData={locationsData} />} />
-                <Route path="/dig-site/:digSiteName" element={<DigSitePage digSite={selectedDigSite} allSpecies={allSpecies} showSpeciesPage={showSpeciesPage} locationsData={locationsData} />} />
+                <Route path="/dig-site/:digSiteName" element={<DigSitePage locationsData={locationsData} />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/digging-game" element={<DiggingGame />} />
             </Routes>
         </div>
     );
