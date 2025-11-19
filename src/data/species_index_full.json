@@ -1032,7 +1032,9 @@
             "lat": 43.5,
             "lng": 103.8
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Nemegt Formation"
         ],
@@ -2420,7 +2422,9 @@
             "lat": 50.2,
             "lng": -110.45
         },
-        "category": [],
+        "category": [ 
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Dinosaur Park Formation"
         ],
@@ -4014,7 +4018,9 @@
             "lat": 51.53,
             "lng": -113.5
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Horseshoe Canyon Formation"
         ],
@@ -5148,7 +5154,9 @@
             "lat": 40.23,
             "lng": -74.0
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Navesink Formation"
         ],
@@ -5734,7 +5742,9 @@
             "lat": 52.93,
             "lng": -113.89
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Horseshoe Canyon Formation"
         ],
@@ -6368,7 +6378,9 @@
             "lat": 36.0,
             "lng": -103.0
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Kirtland Formation"
         ],
@@ -6576,7 +6588,9 @@
             "lat": 49.13,
             "lng": -111.2
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Dinosaur Park Formation"
         ],
@@ -7078,7 +7092,9 @@
             "lat": 47.0,
             "lng": -112.0
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Two Medicine Formation"
         ],
@@ -8842,7 +8858,9 @@
             "lat": 52.78,
             "lng": -110.35
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Dinosaur Park Formation"
         ],
@@ -10098,7 +10116,9 @@
             "lat": 50.15,
             "lng": -108.31
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Dinosaur Park Formation"
         ],
@@ -11062,7 +11082,9 @@
             "lat": 50.73,
             "lng": -111.7
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Nemegt Formation",
             "Dinosaur Park Formation"
@@ -11440,7 +11462,9 @@
             "lat": 36.5,
             "lng": 117.5
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Wangshi Formation"
         ],
@@ -13076,7 +13100,9 @@
             "lat": 36.5,
             "lng": 119.5
         },
-        "category": [],
+        "category": [
+            "Hadrosaurids"
+        ],
         "digsites": [
             "Wangshi Formation"
         ],
